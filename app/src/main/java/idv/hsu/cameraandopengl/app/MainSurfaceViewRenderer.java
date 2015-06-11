@@ -1,7 +1,9 @@
 package idv.hsu.cameraandopengl.app;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.opengl.GLSurfaceView;
+import idv.hsu.cameraandopengl.app.utils.TextResourceReader;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.glClear;
@@ -90,6 +92,9 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+        String vertexShaderSource = TextResourceReader.readTextFromResource(mContext, R.raw.simple_vertex_shader);
+        String fragmentShaderSource = TextResourceReader.readTextFromResource(mContext, R.raw.simple_fragment_shader);
     }
 
     @Override
@@ -174,22 +179,4 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
 //        }
 //    }
 
-    public static String readTextFromResource(Context context, int resId) {
-        StringBuilder body = new StringBuilder();
-
-        try {
-            InputStream inputStream = context.getResources().openRawResource(resId);
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String nextLine;
-
-            while ((nextLine = bufferedReader.readLine()) != null) {
-                body.append(nextLine);
-                body.append('\n');
-            }
-        } catch (IOException ioe) {
-            throw new RuntimeException("Could not open resources: " + resId, ioe);
-        }
-    }
 }
