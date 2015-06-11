@@ -10,6 +10,13 @@ import static android.opengl.GLES20.glViewport;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 /**
  * Created by freeman on 2015/6/10.
@@ -18,15 +25,51 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
     private static final String TAG = MainSurfaceViewRenderer.class.getSimpleName();
     private static final boolean D = false;
 
+    private Context mContext;
+    private static final int POSITION_COMPONENT_COUNT = 2;
+    private float[] tableVertices = {
+            0f,  0f,
+            0f, 14f,
+            9f, 14f,
+            9f,  0f
+    };
+    private float[] tableVerticesWithTriangles = {
+            // first
+            0f,  0f,
+            9f, 14f,
+            0f, 14f,
+
+            // second
+            0f,  0f,
+            9f,  0f,
+            9f, 14f,
+
+            // line
+            0f,  7f,
+            9f,  7f,
+
+            // malets
+            4.5f,2f,
+            4.5f,12f
+    };
+    private static final int BYTES_PER_FLOAT = 4;
+    private final FloatBuffer vertexData;
+
     private GLSurfaceView mSurfaceView;
 
     public MainSurfaceViewRenderer(Context context) {
+        mContext = context;
         mSurfaceView = new GLSurfaceView(context);
         mSurfaceView.setEGLContextClientVersion(2);
 //        mSurfaceView.setEGLContextFactory(this);
 //        mSurfaceView.setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 16, 0));
         mSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 0);
         mSurfaceView.setRenderer(this);
+
+        vertexData = ByteBuffer.allocateDirect(tableVerticesWithTriangles.length * BYTES_PER_FLOAT)
+                               .order(ByteOrder.nativeOrder())
+                               .asFloatBuffer();
+        vertexData.put(tableVerticesWithTriangles);
     }
 //
 //    @Override
@@ -130,4 +173,23 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
 //            return  null;
 //        }
 //    }
+
+    public static String readTextFromResource(Context context, int resId) {
+        StringBuilder body = new StringBuilder();
+
+        try {
+            InputStream inputStream = context.getResources().openRawResource(resId);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String nextLine;
+
+            while ((nextLine = bufferedReader.readLine()) != null) {
+                body.append(nextLine);
+                body.append('\n');
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException("Could not open resources: " + resId, ioe);
+        }
+    }
 }
