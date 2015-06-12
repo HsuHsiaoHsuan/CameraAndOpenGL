@@ -1,7 +1,9 @@
 package idv.hsu.cameraandopengl.app;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.opengl.GLSurfaceView;
+import idv.hsu.cameraandopengl.app.utils.TextResourceReader;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.glClear;
@@ -14,6 +16,13 @@ import static android.opengl.Matrix.*;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 /**
  * Created by freeman on 2015/6/10.
@@ -22,15 +31,51 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
     private static final String TAG = MainSurfaceViewRenderer.class.getSimpleName();
     private static final boolean D = false;
 
+    private Context mContext;
+    private static final int POSITION_COMPONENT_COUNT = 2;
+    private float[] tableVertices = {
+            0f,  0f,
+            0f, 14f,
+            9f, 14f,
+            9f,  0f
+    };
+    private float[] tableVerticesWithTriangles = {
+            // first
+            0f,  0f,
+            9f, 14f,
+            0f, 14f,
+
+            // second
+            0f,  0f,
+            9f,  0f,
+            9f, 14f,
+
+            // line
+            0f,  7f,
+            9f,  7f,
+
+            // malets
+            4.5f,2f,
+            4.5f,12f
+    };
+    private static final int BYTES_PER_FLOAT = 4;
+    private final FloatBuffer vertexData;
+
     private GLSurfaceView mSurfaceView;
 
     public MainSurfaceViewRenderer(Context context) {
+        mContext = context;
         mSurfaceView = new GLSurfaceView(context);
         mSurfaceView.setEGLContextClientVersion(2);
 //        mSurfaceView.setEGLContextFactory(this);
 //        mSurfaceView.setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 16, 0));
         mSurfaceView.setEGLConfigChooser(5, 6, 5, 0, 16, 0);
         mSurfaceView.setRenderer(this);
+
+        vertexData = ByteBuffer.allocateDirect(tableVerticesWithTriangles.length * BYTES_PER_FLOAT)
+                               .order(ByteOrder.nativeOrder())
+                               .asFloatBuffer();
+        vertexData.put(tableVerticesWithTriangles);
     }
 //
 //    @Override
@@ -50,7 +95,10 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        glClearColor(0.3f, 0.3f, 0.3f, 0.3f);
+        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+        String vertexShaderSource = TextResourceReader.readTextFromResource(mContext, R.raw.simple_vertex_shader);
+        String fragmentShaderSource = TextResourceReader.readTextFromResource(mContext, R.raw.simple_fragment_shader);
     }
 
     @Override
@@ -134,4 +182,5 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
 //            return  null;
 //        }
 //    }
+
 }

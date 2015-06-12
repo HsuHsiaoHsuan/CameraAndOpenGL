@@ -69,6 +69,7 @@ public class MainActivity extends Activity {
         mGLSurface = mRenderer.getGLSurfaceView();
         mGLSurface.setZOrderMediaOverlay(true);
         mGLSurface.setVisibility(View.VISIBLE);
+//        mGLSurface.setVisibility(View.INVISIBLE);
         mGLSurface.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         mRootViewGroup.addView(mGLSurface);
 
