@@ -8,6 +8,10 @@ import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
 import static android.opengl.GLES20.glViewport;
 
+import static android.opengl.GLES20.*;
+import static android.opengl.GLUtils.*;
+import static android.opengl.Matrix.*;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -46,7 +50,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.3f, 0.3f, 0.3f, 0.3f);
     }
 
     @Override
