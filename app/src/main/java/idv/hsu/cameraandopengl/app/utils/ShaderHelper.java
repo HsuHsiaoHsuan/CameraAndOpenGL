@@ -55,7 +55,64 @@ public class ShaderHelper {
         if (D) {
             Log.v(TAG, "Results of compiling source: \n" + shaderCode + "\n:" + glGetShaderInfoLog(shaderObjectId));
         }
+
+        if (compileStatus[0] == 0) {
+            // If it failed, delete the shader object.
+            glDeleteShader(shaderObjectId);
+
+            if (D) {
+                Log.w(TAG, "Compilation of shader failed.");
+            }
+
+            return 0;
+        }
+
+        return shaderObjectId;
     }
 
+    public static int linkProgram(int vertexShaderId, int fragmentShaderId) {
+        final int programObjectId = glCreateProgram();
 
+        if (programObjectId == 0) {
+            if (D) {
+                Log.w(TAG, "Could not create new progam");
+            }
+            return 0;
+        }
+
+        // attach shaders to program object
+        glAttachShader(programObjectId, vertexShaderId);
+        glAttachShader(programObjectId, fragmentShaderId);
+
+        // join shaders together
+        glLinkProgram(programObjectId);
+
+        final int[] linkStatus = new int[1];
+        // check whether the link failed or succeeded
+        glGetProgramiv(programObjectId, GL_LINK_STATUS, linkStatus, 0);
+        if (D) { // print the program info
+            Log.v(TAG, "Results to linking pogram: \n" + glGetProgramInfoLog(programObjectId));
+        }
+        if (linkStatus[0] == 0) { // it it failed.
+            glDeleteProgram(programObjectId);
+            if (D) {
+                Log.w(TAG, "Linking of program failed.");
+            }
+            return 0;
+        }
+
+        return programObjectId;
+    }
+
+    // before start to use it, validate it is valid for the current OpenGL state.
+    public static boolean validateProgram(int programObjectId) {
+        glValidateProgram(programObjectId);
+
+        final int[] validateStatus = new int[1];
+        glGetProgramiv(programObjectId, GL_VALIDATE_STATUS, validateStatus, 0);
+        Log.v(TAG, "Results to validating program: " + validateStatus[0] +
+                   "\n Log:" + glGetProgramInfoLog(programObjectId));
+
+        return validateStatus[0] != 0;
+    }
 }

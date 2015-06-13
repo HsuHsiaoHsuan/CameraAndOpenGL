@@ -3,6 +3,7 @@ package idv.hsu.cameraandopengl.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.opengl.GLSurfaceView;
+import idv.hsu.cameraandopengl.app.utils.ShaderHelper;
 import idv.hsu.cameraandopengl.app.utils.TextResourceReader;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
@@ -32,7 +33,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
     private static final boolean D = false;
 
     private Context mContext;
-    private static final int POSITION_COMPONENT_COUNT = 2;
+    private static final int POSITION_COMPONENT_COUNT = 2; // ues two floating point values per vertex, so ...2
     private float[] tableVertices = {
             0f,  0f,
             0f, 14f,
@@ -40,26 +41,32 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
             9f,  0f
     };
     private float[] tableVerticesWithTriangles = {
-            // first
-            0f,  0f,
-            9f, 14f,
-            0f, 14f,
+            // first triangle
+            -0.5f, -0.5f, //0f,  0f,
+             0.5f,  0.5f, // 9f, 14f,
+            -0.5f,  0.5f, // 0f, 14f,
 
-            // second
-            0f,  0f,
-            9f,  0f,
-            9f, 14f,
+            // second triangle
+            -0.5f, -0.5f, // 0f,  0f,
+             0.5f, -0.5f, // 9f,  0f,
+             0.5f,  0.5f,// 9f, 14f,
 
             // line
-            0f,  7f,
-            9f,  7f,
+            -0.5f, 0f, // 0f,  7f,
+             0.5f, 0f, // 9f,  7f,
 
             // malets
-            4.5f,2f,
-            4.5f,12f
+            0f, -0.25f, // 4.5f,2f,
+            0f,  0.25f  // 4.5f,12f
     };
     private static final int BYTES_PER_FLOAT = 4;
     private final FloatBuffer vertexData;
+    private int program;
+
+    private static final String U_COLOR = "u_Color";
+    private int uColorLocation;
+    private static final String A_POSITION = "a_Position";
+    private int aPositionLocation;
 
     private GLSurfaceView mSurfaceView;
 
@@ -95,10 +102,27 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         String vertexShaderSource = TextResourceReader.readTextFromResource(mContext, R.raw.simple_vertex_shader);
         String fragmentShaderSource = TextResourceReader.readTextFromResource(mContext, R.raw.simple_fragment_shader);
+
+        int vertexShader = ShaderHelper.compileVertexShader(vertexShaderSource);
+        int fragmentShader = ShaderHelper.compileFragmentShader(fragmentShaderSource);
+        program = ShaderHelper.linkProgram(vertexShader, fragmentShader);
+        if (D) {
+            ShaderHelper.validateProgram(program);
+        }
+        glUseProgram(program);
+
+        uColorLocation = glGetUniformLocation(program, U_COLOR); // find simple_vertex_shader.glsl
+        aPositionLocation = glGetAttribLocation(program, A_POSITION); // find simple_gragment_shader.glsl
+
+        vertexData.position(0);
+        // tell OpenGL find data for a_Position in the buffer vertexData.
+        // MUST VERY CAREFUL!
+        glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT, false, 0, vertexData);
+        glEnableVertexAttribArray(aPositionLocation);
     }
 
     @Override
@@ -109,6 +133,17 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer/*, GLSurf
     @Override
     public void onDrawFrame(GL10 gl10) {
         glClear(GL_COLOR_BUFFER_BIT);
+        glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f); // update value of su_Color
+        glDrawArrays(GL_TRIANGLES, 0, 6); // start from 0, and read in six vertices.
+
+        glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_LINES, 6, 2);
+
+        glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
+        glDrawArrays(GL_POINTS, 8, 1);
+
+        glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_POINTS, 9, 1);
     }
 
     public GLSurfaceView getGLSurfaceView() {
