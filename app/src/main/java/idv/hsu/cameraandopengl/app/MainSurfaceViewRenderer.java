@@ -2,6 +2,7 @@ package idv.hsu.cameraandopengl.app;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import idv.hsu.cameraandopengl.app.utils.MatrixHelper;
 import idv.hsu.cameraandopengl.app.utils.ShaderHelper;
 import idv.hsu.cameraandopengl.app.utils.TextResourceReader;
 
@@ -22,7 +23,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
 
     private static final String A_POSITION = "a_Position";
     private static final String A_COLOR = "a_Color";
-    private static final int POSITION_COMPONENT_COUNT = 2; // ues two floating point values per vertex, so ...2
+    private static final int POSITION_COMPONENT_COUNT = 4; // ues two floating point values per vertex, so ...2
     private static final int COLOR_COMPONENT_COUNT = 3;
     private static final int BYTES_PER_FLOAT = 4;
     // 2 position code + 3 color code
@@ -45,21 +46,21 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
         mSurfaceView.setRenderer(this);
 
         float[] tableVerticesWithTriangles = {
-                // Order of coordinates: X, Y, R, G, B
-                   0f,    0f,   1f,   1f,   1f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                 0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                 0.5f,  0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f,  0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                // Order of coordinates: X, Y, Z, W, R, G, B
+                   0f,    0f, 0f, 1.5f,   1f,   1f,   1f,
+                -0.5f, -0.8f, 0f,   1f, 0.7f, 0.7f, 0.7f,
+                 0.5f, -0.8f, 0f,   1f, 0.7f, 0.7f, 0.7f,
+                 0.5f,  0.8f, 0f,   2f, 0.7f, 0.7f, 0.7f,
+                -0.5f,  0.8f, 0f,   2f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.8f, 0f,   1f, 0.7f, 0.7f, 0.7f,
 
                 // line
-                -0.5f, 0f, 1f, 0f, 0f,
-                 0.5f, 0f, 1f, 0f, 0f,
+                -0.5f, 0f, 0f, 1.5f, 1f, 0f, 0f,
+                 0.5f, 0f, 0f, 1.5f, 1f, 0f, 0f,
 
                 // malets
-                0f, -0.25f, 0f, 0f, 1f,
-                0f,  0.25f, 1f, 0f, 0f
+                0f, -0.4f, 0f, 1.25f, 0f, 0f, 1f,
+                0f,  0.4f, 1f, 1.75f, 1f, 0f, 0f
         };
 
         vertexData = ByteBuffer.allocateDirect(tableVerticesWithTriangles.length * BYTES_PER_FLOAT)
@@ -103,6 +104,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         glViewport(0, 0, width, height);
+//        MatrixHelper.perspectiveM(projectionMatrix , 45, (float)width / (float)height, 1f, 10f);
     }
 
     @Override
