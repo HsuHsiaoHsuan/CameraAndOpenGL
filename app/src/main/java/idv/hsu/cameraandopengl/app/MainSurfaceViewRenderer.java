@@ -13,6 +13,9 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import static android.opengl.GLES20.*;
+import static android.opengl.Matrix.orthoM;
+import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
 
 /**
  * Created by freeman on 2015/6/10.
@@ -23,6 +26,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
 
     private static final String A_POSITION = "a_Position";
     private static final String A_COLOR = "a_Color";
+    private static final String U_MATRIX = "u_Matrix";
     private static final int POSITION_COMPONENT_COUNT = 4; // ues two floating point values per vertex, so ...2
     private static final int COLOR_COMPONENT_COUNT = 3;
     private static final int BYTES_PER_FLOAT = 4;
@@ -31,10 +35,13 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
 
     private final FloatBuffer vertexData;
     private final Context mContext;
+    private final float[] projectionMatrix = new float[16];
+    private final float[] modelMatrix = new float[16];
 
     private int program;
     private int aPositionLocation;
     private int aColorLocation;
+    private int uMatrixLocation;
     private GLSurfaceView mSurfaceView;
 
     public MainSurfaceViewRenderer(Context context) {
@@ -87,6 +94,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
 
         aPositionLocation = glGetAttribLocation(program, A_POSITION); // find simple_gragment_shader.glsl
         aColorLocation    = glGetAttribLocation(program, A_COLOR);    // find simple_vertex_shader.glsl
+        uMatrixLocation   = glGetUniformLocation(program, U_MATRIX);
 
         vertexData.position(0);
         // tell OpenGL find data for a_Position in the buffer vertexData.
@@ -99,17 +107,31 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
         glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GL_FLOAT, false, STRIDE, vertexData);
 
         glEnableVertexAttribArray(aColorLocation);
+
+        setIdentityM(modelMatrix, 0);
+        translateM(modelMatrix, 0, 0f, 0f, -2f);
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         glViewport(0, 0, width, height);
+        final float aspectRatio = width > height ?
+                (float) width / (float) height :
+                (float) height / (float) width;
+
+        if (width > height) { // Landscape
+            orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+        } else { // Portrait or square
+            orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+        }
 //        MatrixHelper.perspectiveM(projectionMatrix , 45, (float)width / (float)height, 1f, 10f);
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0);
 
         glDrawArrays(GL_TRIANGLE_FAN, 0, 6); // start from 0, and read in six vertices
 
