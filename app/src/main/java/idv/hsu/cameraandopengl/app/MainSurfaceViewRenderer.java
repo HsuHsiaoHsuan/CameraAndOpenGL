@@ -13,9 +13,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import static android.opengl.GLES20.*;
-import static android.opengl.Matrix.orthoM;
-import static android.opengl.Matrix.setIdentityM;
-import static android.opengl.Matrix.translateM;
+import static android.opengl.Matrix.*;
 
 /**
  * Created by freeman on 2015/6/10.
@@ -107,24 +105,27 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
         glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GL_FLOAT, false, STRIDE, vertexData);
 
         glEnableVertexAttribArray(aColorLocation);
-
-        setIdentityM(modelMatrix, 0);
-        translateM(modelMatrix, 0, 0f, 0f, -2f);
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         glViewport(0, 0, width, height);
-        final float aspectRatio = width > height ?
-                (float) width / (float) height :
-                (float) height / (float) width;
-
-        if (width > height) { // Landscape
-            orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
-        } else { // Portrait or square
-            orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
-        }
-//        MatrixHelper.perspectiveM(projectionMatrix , 45, (float)width / (float)height, 1f, 10f);
+//        final float aspectRatio = width > height ?
+//                (float) width / (float) height :
+//                (float) height / (float) width;
+//
+//        if (width > height) { // Landscape
+//            orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+//        } else { // Portrait or square
+//            orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+//        }
+        MatrixHelper.perspectiveM(projectionMatrix , 45, (float)width / (float)height, 1f, 10f);
+        setIdentityM(modelMatrix, 0);
+        translateM(modelMatrix, 0, 0f, 0f, -2.5f);
+        rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
+        final float[] temp = new float[16];
+        multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0);
+        System.arraycopy(temp, 0, projectionMatrix, 0, temp.length);
     }
 
     @Override
