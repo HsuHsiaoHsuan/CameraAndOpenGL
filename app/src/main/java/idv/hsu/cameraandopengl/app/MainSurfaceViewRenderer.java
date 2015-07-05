@@ -50,6 +50,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
         mSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         mSurfaceView.setRenderer(this);
 
+
         float[] tableVerticesWithTriangles = {
                 // Order of coordinates: X, Y, Z, W, R, G, B
                    0f,    0f, 0f, 1.5f,   1f,   1f,   1f,
@@ -65,7 +66,7 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
 
                 // malets
                 0f, -0.4f, 0f, 1.25f, 0f, 0f, 1f,
-                0f,  0.4f, 1f, 1.75f, 1f, 0f, 0f
+                0f,  0.4f, 0f, 1.75f, 1f, 0f, 0f
         };
 
         vertexData = ByteBuffer.allocateDirect(tableVerticesWithTriangles.length * BYTES_PER_FLOAT)
@@ -120,9 +121,12 @@ public class MainSurfaceViewRenderer implements GLSurfaceView.Renderer {
 //            orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
 //        }
         MatrixHelper.perspectiveM(projectionMatrix , 45, (float)width / (float)height, 1f, 10f);
+
         setIdentityM(modelMatrix, 0);
+
         translateM(modelMatrix, 0, 0f, 0f, -2.5f);
         rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
+
         final float[] temp = new float[16];
         multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0);
         System.arraycopy(temp, 0, projectionMatrix, 0, temp.length);
